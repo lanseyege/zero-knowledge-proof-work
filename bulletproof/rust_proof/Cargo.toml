@@ -1,0 +1,39 @@
+[package]
+name = "rust_proof"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+toml = "0.5.8"
+rug = "1.19.2"
+sha256 = "1.1.2"
+
+[[bin]]
+name = "rust_proof"
+path = "src/main.rs"
+
+[[bin]] 
+name = "key_distribution"
+path = "src/main_bullet_proof_key_generation.rs"
+
+[[bin]]
+name = "bullet_proof_prover"
+path = "src/main_bullet_proof_prover.rs"
+
+[[bin]]
+name = "bullet_proof_verifier"
+path = "src/main_bullet_proof_verifier.rs"
+
+[[bin]]
+name = "inner_product_prover"
+path = "src/main_inner_product_prover.rs"
+
+[[bin]]
+name = "inner_product_verifier"
+path = "src/main_inner_product_verifier.rs"
+
+[[test]]
+name = "test_base_prover"
+

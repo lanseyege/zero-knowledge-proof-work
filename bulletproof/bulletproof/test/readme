@@ -1,0 +1,1 @@
+g++ test3.cpp ../basic.cpp ../bullet.cpp ../prover.cpp ../verify.cpp -o test3 -lgmp -lcryptopp

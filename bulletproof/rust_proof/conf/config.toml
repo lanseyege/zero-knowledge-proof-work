@@ -1,0 +1,8 @@
+[params]
+bit_length = 16
+p_length = 128
+witness = 44
+prime_reps = 30
+is_random = 0
+rand_seed = 10
+

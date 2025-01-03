@@ -1,0 +1,386 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"github.com/Nik-U/pbc"
+	"github.com/BurntSushi/toml"
+	"reflect"
+)
+// n \times m  mat_mul  m \times l
+func matrix_matmul(res [][]*pbc.Element, A [][]*pbc.Element, B [][]*pbc.Element, n int, m int, l int, temp *pbc.Element) {
+	for i := 0; i < n; i++ {
+		for j := 0; j < l; j++ {
+			for j2 := 0; j2 < m ; j2 ++ {
+				//res[i][j] += A[i][j2] * B[j2][j]
+				temp.Mul(A[i][j2], B[j2][j])
+				res[i][j].ThenAdd(temp)
+			}
+		}
+	}
+}
+
+func matrix_matmul_exp(res [][]*pbc.Element, A [][]*pbc.Element, B [][]*pbc.Element, n int, m int, l int, generator *pbc.Element, temp *pbc.Element, temp2 *pbc.Element) {
+	for i := 0; i < n; i++ {
+		for j := 0; j < l; j++ {
+			for j2 := 0; j2 < m ; j2 ++ {
+				temp.Mul(A[i][j2], B[j2][j])
+				temp2.ThenAdd(temp)
+			}
+			res[i][j].PowZn(generator, temp2)
+			temp2.Set0()
+		}
+	}
+	temp.Set0()
+}
+
+func matrix_mul_vec_exp(res []*pbc.Element, A [][]*pbc.Element, B []*pbc.Element, n int, m int, generator *pbc.Element, temp *pbc.Element, temp2 *pbc.Element) {
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			temp.Mul(A[i][j], B[j])
+			//res[i].ThenAdd(temp)
+			temp2.ThenAdd(temp)
+		}
+		res[i].PowZn(generator, temp2)
+		temp2.Set0()
+	}
+	temp.Set0()
+}
+
+func matrix_mul_vec(res []*pbc.Element, A [][]*pbc.Element, B []*pbc.Element, n int, m int, temp *pbc.Element) {
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			temp.Mul(A[i][j], B[j])
+			res[i].ThenAdd(temp)
+		}
+	}
+	temp.Set0()
+}
+
+func matrix_power(res [][]*pbc.Element, A [][]*pbc.Element, n int, m int, generator *pbc.Element) {
+	for i := 0; i < n; i ++ {
+		for j := 0; j < m; j ++ {
+			res[i][j].PowZn(generator, A[i][j])
+		}
+	}
+}
+
+func matrix_power_scalar(res [][]*pbc.Element, A [][]*pbc.Element, a *pbc.Element, n int, m int) {
+	for i := 0; i < n; i ++ {
+		for j := 0; j < m; j ++ {
+			res[i][j].PowZn(A[i][j], a)
+		}
+	}
+}
+
+func matrix_power_scalar_self(res [][]*pbc.Element, a *pbc.Element, n int, m int) {
+	for i := 0; i < n; i ++ {
+		for j := 0; j < m; j ++ {
+			res[i][j].ThenPowZn(a)
+		}
+	}
+}
+
+func matrix_mul_scalar(res [][]*pbc.Element, A [][]*pbc.Element, B *pbc.Element, n int, m int, temp *pbc.Element) {
+	for i := 0; i < n; i ++ {
+		for j := 0; j < m; j++ {
+			temp.Mul( A[i][j], B)
+			res[i][j].ThenAdd(temp)
+		}
+	}
+}
+
+func matrix_mat_dotmul(A [][]*pbc.Element, B [][]*pbc.Element, n int, m int) {
+	for i := 0; i < n; i ++ {
+		for j := 0; j < m; j ++ {
+			A[i][j].ThenMul(B[i][j])
+		}
+	}
+}
+
+func vec_dotmul(res []*pbc.Element, A []*pbc.Element, B []*pbc.Element, n int) {
+	for i := 0; i < n; i ++ {
+		res[i].Mul(A[i], B[i])
+	}
+}
+
+func vec_power_scalar(res []*pbc.Element, A []*pbc.Element, b *pbc.Element, n int) {
+	for i := 0; i < n; i ++ {
+		res[i].PowZn(A[i], b)
+	}
+}
+func vec_dotmul_self(res []*pbc.Element, A []*pbc.Element, n int) {
+	for i := 0; i < n; i++ {
+		res[i].ThenMul(A[i])
+	}
+}
+
+func matrix_pairing(res []*pbc.Element, A [][]*pbc.Element, B []*pbc.Element, n int, m int, temp *pbc.Element) {
+	for i := 0; i < n; i ++ {
+		for j := 0; j < m; j ++ {
+			temp.Pair(A[i][j], B[j])
+			res[i].ThenMul(temp)
+		}
+	}
+}
+
+func vec_pairing(res *pbc.Element, A []*pbc.Element, B []*pbc.Element, n int, temp *pbc.Element) {
+	for i := 0; i < n; i++ {
+		temp.Pair(A[i], B[i])
+		res.ThenMul(temp)
+	}
+}
+
+func matrix_power_vec(res []*pbc.Element, A [][]*pbc.Element, B []*pbc.Element, n int, m int, temp *pbc.Element) {
+	for i := 0; i < n; i ++ {
+		res[i].Set1()
+		for j := 0; j < m; j ++ {
+			temp.PowZn(A[j][i], B[j])
+			res[i].ThenMul(temp)
+		}
+	}
+}
+
+
+func EncodeS(IS []*pbc.Element, l1 int, S []int) {
+	for i := 0; i < l1; i ++ {
+		IS[i].Set1()
+	}
+	for i := 0; i < len(S); i ++ {
+		IS[S[i] - 1].Set0()
+	}
+}
+
+func EncodeW(IW []*pbc.Element, l1 int, w string, Phi []string) {
+	for i := 0; i < l1; i ++ {
+		IW[i].Set0()
+		if w == Phi[i] {
+			IW[i].Set1()
+		}
+	}
+}
+
+func write_config_to_toml_file(file_name string, class interface{}) {
+	fmt.Println(file_name)
+	fmt.Println(class)
+	file1 , err := os.Create(file_name)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := toml.NewEncoder(file1).Encode(class); err != nil {
+		fmt.Println(err)
+	}
+	if err := file1.Close() ; err != nil {
+		fmt.Println(err)
+	}
+}
+
+func write_to_string_to_file(file_name string, class interface{}) {
+	n := reflect.TypeOf(class).NumField()
+	result := ""
+	for i := 0 ; i < n; i ++ {
+		fd1 := reflect.ValueOf(class).Field(i)
+		fmt.Println(fd1)
+		if  fd1.Type().String() != "*pbc.Element" {
+			for j1 := 0; j1 < fd1.Len(); j1 ++ {
+				fd2 := fd1.Index(j1)
+				if  fd2.Type().String() != "*pbc.Element" {
+					for j2 := 0; j2 < fd2.Len(); j2 ++ {
+						fd3 := fd2.Index(j2)
+						if  fd3.Type().String() != "*pbc.Element" {
+							for j3 := 0; j3 < fd3.Len(); j3 ++ {
+								if  fd3.Index(j3).Type().String() != "*pbc.Element" {
+									fmt.Println("something goes wrong ... ")
+								} else {
+									result = result + fmt.Sprintf("%s", fd3.Index(j3)) + "\n"
+								}
+							}
+						} else {
+							result = result + fmt.Sprintf("%s", fd2.Index(j2)) + "\n"
+						}
+					}
+				} else {
+					result = result + fmt.Sprintf("%s", fd1.Index(j1)) + "\n"
+				}
+			}
+		}
+	}
+	file , err := os.Create(file_name)
+	fmt.Println(err)
+	enc, err := file.WriteString(result)
+	fmt.Println(enc)
+	file.Close()
+}
+
+func read_config_from_toml_file(file_name string, class interface{}) {
+
+}
+
+func read_from_file_to_string(file_name string) []string {
+	bits , err := os.ReadFile(file_name)
+	if err != nil {fmt.Println(err)}
+	content := strings.Split(string(bits), "\n")
+	return content
+}
+
+func string_to_struct_pk(content []string, l1 int, l2 int, k int) PK {
+	A1 := make([][]*pbc.Element, k)
+	AU1 := make([][]*pbc.Element, k)
+	AU2 := make([][]*pbc.Element, k)
+	AW1 := make([][][]*pbc.Element, l1)
+	AW2 := make([][][]*pbc.Element, l2)
+	Ak := make([]*pbc.Element, k)
+
+	for i := 0; i < k ; i ++ {
+		A1[i] = make([]*pbc.Element, k + 1)
+		AU1[i] = make([]*pbc.Element, 2 * k + 1)
+		AU2[i] = make([]*pbc.Element, 2 * k + 1)
+	}
+	for i := 0; i < l1; i++ {
+		AW1[i] = make([][]*pbc.Element, k)
+		for j := 0; j < k; j++ {
+			AW1[i][j] = make([]*pbc.Element, 2 * k + 1)
+		}
+	}
+	for i := 0; i < l2; i++ {
+		AW2[i] = make([][]*pbc.Element, k)
+		for j := 0; j < k; j++ {
+			AW2[i][j] = make([]*pbc.Element, 2 * k + 1)
+		}
+	}
+	for i := 0; i < k ; i ++ {
+		for j := 0; j < k + 1; j ++ {
+			A1[i][j] = pairing.NewG1()
+		}
+	} 	//initialize AU1 AU2 AW1 AW2 Ak
+	for i := 0; i < k; i++ {
+		Ak[i] = pairing.NewGT()
+		for j := 0; j < 2 * k + 1; j++ {
+			AU1[i][j] = pairing.NewG1()
+			AU2[i][j] = pairing.NewG1()
+		}
+	}
+	for i := 0; i < l1; i++ {
+		for j := 0; j < k; j++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				AW1[i][j][j2] = pairing.NewG1()
+			}
+		}
+	}
+	for i := 0; i < l2; i++ {
+		for j := 0; j < k; j++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				AW2[i][j][j2] = pairing.NewG1()
+			}
+		}
+	}
+	// set value
+	inx := 0
+	for i := 0; i < k; i ++ {
+		for j := 0; j < k + 1; j ++ {
+			A1[i][j].SetString(content[inx++], 10)
+		}
+	}
+	for i := 0; i < k; i ++ {
+		for j := 0; j < 2 * k + 1; j ++ {
+			AU1[i][j].SetString(content[inx++], 10)
+		}
+	}
+	for i := 0; i < k; i ++ {
+		for j := 0; j < 2 * k + 1; j ++ {
+			AU2[i][j].SetString(content[inx++], 10)
+		}
+	}
+	for i := 0; i < l1; i ++ {
+		for j := 0; j < k ; j ++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				AW1[i][j][j2].SetString(content[inx++], 10)
+			}
+		}
+	}
+	for i := 0; i < l1; i ++ {
+		for j := 0; j < k ; j ++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				AW2[i][j][j2].SetString(content[inx++], 10)
+			}
+		}
+	}
+	for i := 0; i < k; i ++ {
+		Ak[i].SetString(content[inx++], 10)
+	}
+	return PK{A1, AU1, AU2, AW1, AW2, Ak}
+}
+
+func string_to_struct_msk(content []string, l1 int, l2 int, k int) MSK {
+	K_bond := make([]*pbc.Element, k + 1)
+	W1 := make([][][]*pbc.Element, l1)
+	W2 := make([][][]*pbc.Element, l2)
+	B1 := make([][]*pbc.Element, 2 * k + 1)
+
+	for i := 0; i < l1; i++ {
+		W1[i] = make([][]*pbc.Element, k + 1)
+		for j := 0; j < k + 1; j++ {
+			W1[i][j] = make([]*pbc.Element, 2 * k + 1)
+		}
+	}
+	for i := 0; i < l2; i++ {
+		W2[i] = make([][]*pbc.Element, k + 1)
+		for j := 0; j < k + 1; j++ {
+			W2[i][j] = make([]*pbc.Element, 2 * k + 1)
+		}
+	}
+	for i := 0; i < 2 * k + 1; i++ {
+		B1[i] = make([]*pbc.Element, k)
+	} //K_bond
+	for i := 0; i < k + 1; i++ {
+		K_bond[i] = pairing.NewZr()
+	}
+	// B1
+	for i := 0; i < 2 * k + 1; i++ {
+		for j := 0; j < k ; j++ {
+			B1[i][j] = pairing.NewZr()
+		}
+	} // W1
+	for i := 0; i < l1; i ++ {
+		for j := 0; j < k + 1; j++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				W1[i][j][j2] = pairing.NewZr()
+			}
+		}
+	} // W2
+	for i := 0; i < l2; i ++ {
+		for j := 0; j < k + 1; j++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				W2[i][j][j2] = pairing.NewZr()
+			}
+		}
+	}
+	// set value
+	inx := 0
+	for i := 0; i < k + 1; i ++ {
+		K_bond[i].SetString(content[inx++], 10)
+	} // W1
+	for i := 0; i < l1; i ++ {
+		for j := 0; j < k + 1; j++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				W1[i][j][j2].SetString(content[inx++], 10)
+			}
+		}
+	} // W2
+	for i := 0; i < l2; i ++ {
+		for j := 0; j < k + 1; j++ {
+			for j2 := 0; j2 < 2 * k + 1; j2 ++ {
+				W2[i][j][j2].SetString(content[inx++], 10)
+			}
+		}
+	} // B1
+	for i := 0; i < 2 * k + 1; i++ {
+		for j := 0; j < k ; j++ {
+			B1[i][j].SetString(content[inx++], 10)
+		}
+	} 
+	return MSK{K_bond, W1, W2, B1}
+}
+func string_to_struct_msk(content []string, l1 int, l2 int, k int) SKx { 
+	
+}

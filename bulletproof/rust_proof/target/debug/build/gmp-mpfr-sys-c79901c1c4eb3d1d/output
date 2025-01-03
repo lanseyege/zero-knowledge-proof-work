@@ -1,0 +1,18 @@
+cargo:rerun-if-env-changed=GMP_MPFR_SYS_CACHE
+$ mkdir -p "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/lib"
+$ mkdir -p "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/include"
+$ cp "/home/yege/.cache/gmp-mpfr-sys/1.5/x86_64-unknown-linux-gnu/1.5.2/libmpc.a" "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/lib/libmpc.a"
+$ cp "/home/yege/.cache/gmp-mpfr-sys/1.5/x86_64-unknown-linux-gnu/1.5.2/mpc.h" "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/include/mpc.h"
+$ cp "/home/yege/.cache/gmp-mpfr-sys/1.5/x86_64-unknown-linux-gnu/1.5.2/libmpfr.a" "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/lib/libmpfr.a"
+$ cp "/home/yege/.cache/gmp-mpfr-sys/1.5/x86_64-unknown-linux-gnu/1.5.2/mpfr.h" "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/include/mpfr.h"
+$ cp "/home/yege/.cache/gmp-mpfr-sys/1.5/x86_64-unknown-linux-gnu/1.5.2/libgmp.a" "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/lib/libgmp.a"
+cargo:limb_bits=64
+$ cp "/home/yege/.cache/gmp-mpfr-sys/1.5/x86_64-unknown-linux-gnu/1.5.2/gmp.h" "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/include/gmp.h"
+cargo:limb_bits=64
+cargo:out_dir=/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out
+cargo:lib_dir=/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/lib
+cargo:include_dir=/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/include
+cargo:rustc-link-search=native=/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/gmp-mpfr-sys-c79901c1c4eb3d1d/out/lib
+cargo:rustc-link-lib=static=mpc
+cargo:rustc-link-lib=static=mpfr
+cargo:rustc-link-lib=static=gmp

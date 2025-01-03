@@ -1,0 +1,10 @@
+l1 = 6
+l2 = 4
+k = 4
+bit_length = 256
+pair_file = "./config/f.param"
+Phi = ["a", "b", "c", "d", "e", "f"]
+keys_path = "./keys/"
+data_path = "./data/"
+S = [2, 4, 5]
+seed = -1

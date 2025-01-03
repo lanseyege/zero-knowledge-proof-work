@@ -1,0 +1,6 @@
+$ mkdir -p "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/az-181dc8bf0062996b/out/try_track_caller"
+$ cd "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/az-181dc8bf0062996b/out/try_track_caller"
+$ printf '%s' "// try_tra"... > "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/az-181dc8bf0062996b/out/try_track_caller/try_track_caller.rs"
+$ cd "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/az-181dc8bf0062996b/out/try_track_caller" && "rustc" "try_track_caller.rs" "--emit=dep-info,metadata" >& /dev/null
+cargo:rustc-cfg=track_caller
+$ rm -r "/home/yege/Work/cryptography/rangeproof/rust_proof/target/debug/build/az-181dc8bf0062996b/out/try_track_caller"

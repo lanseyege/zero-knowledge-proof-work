@@ -1,0 +1,32 @@
+[package]
+name = "rust_fnizk"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+toml = "0.5.8"
+rug = "1.19.2"
+sha256 = "1.1.2"
+
+[[bin]] 
+name = "key_distribution"
+path = "src/main_fnizk_key_generation.rs"
+
+[[bin]]
+name = "fnizk_prover"
+path = "src/main_fnizk_prover.rs"
+
+[[bin]]
+name = "fnizk_verifier"
+path = "src/main_fnizk_verifier.rs"
+
+[[bin]]
+name = "inner_product_prover"
+path = "src/main_inner_product_prover.rs"
+
+[[bin]]
+name = "inner_product_verifier"
+path = "src/main_inner_product_verifier.rs"
+

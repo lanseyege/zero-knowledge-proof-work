@@ -1,0 +1,11 @@
+la = 9
+lb = 8
+k = 8
+
+length = 25
+pair_file = "./config/f.param"
+Phi = ["a", "b", "c", "d", "e", "f", "g", "h"]
+
+S = [1, 3, 5]
+keys = "./keys/"
+data = "./data/"
